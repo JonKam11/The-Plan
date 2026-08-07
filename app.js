@@ -151,7 +151,131 @@ document.getElementById("cal-next").addEventListener("click", () => {
   renderCalendar();
 });
 
-// ---------- Page switching (Dashboard / Gym) ----------
+// ---------- Work / shifts data ----------
+
+const SHIFTS_KEY = "bulk-tracker-shifts";
+const WAGE_KEY = "bulk-tracker-wage";
+
+function getShifts() {
+  const raw = localStorage.getItem(SHIFTS_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+function saveShifts(shifts) {
+  localStorage.setItem(SHIFTS_KEY, JSON.stringify(shifts));
+}
+
+function addShift(date, hours) {
+  const shifts = getShifts();
+  shifts.push({ id: Date.now().toString(), date, hours });
+  shifts.sort((a, b) => new Date(b.date) - new Date(a.date));
+  saveShifts(shifts);
+}
+
+function deleteShift(id) {
+  const shifts = getShifts().filter((s) => s.id !== id);
+  saveShifts(shifts);
+}
+
+function getWage() {
+  const raw = localStorage.getItem(WAGE_KEY);
+  return raw ? parseFloat(raw) : 0;
+}
+
+function setWage(value) {
+  localStorage.setItem(WAGE_KEY, value);
+}
+
+function formatKr(amount) {
+  return `${Math.round(amount).toLocaleString("nb-NO")} kr`;
+}
+
+function isThisMonth(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+}
+
+function renderShiftList() {
+  const listEl = document.getElementById("shift-list");
+  const shifts = getShifts();
+
+  if (shifts.length === 0) {
+    listEl.innerHTML = `<div class="empty-state">No shifts logged yet.</div>`;
+    return;
+  }
+
+  const wage = getWage();
+
+  listEl.innerHTML = shifts
+    .map((s) => {
+      const earned = s.hours * wage;
+      return `
+      <div class="history-item">
+        <div>
+          <div class="session-name">${s.hours}h — ${formatKr(earned)}</div>
+          <div class="session-date">${formatDateLabel(s.date)}</div>
+        </div>
+        <button class="delete-btn" data-id="${s.id}">Delete</button>
+      </div>
+    `;
+    })
+    .join("");
+
+  listEl.querySelectorAll(".delete-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      deleteShift(btn.dataset.id);
+      renderWorkPage();
+    });
+  });
+}
+
+function renderWorkStats() {
+  const period = document.getElementById("work-period").value;
+  const shifts = getShifts();
+  const wage = getWage();
+
+  const relevant = period === "month" ? shifts.filter((s) => isThisMonth(s.date)) : shifts;
+
+  const totalHours = relevant.reduce((sum, s) => sum + s.hours, 0);
+  const totalEarned = totalHours * wage;
+
+  document.getElementById("total-earned").textContent = formatKr(totalEarned);
+  document.getElementById("stat-hours").textContent = totalHours.toLocaleString("nb-NO");
+  document.getElementById("stat-earned").textContent = formatKr(totalEarned);
+}
+
+function renderWorkPage() {
+  renderShiftList();
+  renderWorkStats();
+}
+
+document.getElementById("log-shift-btn").addEventListener("click", () => {
+  const date = document.getElementById("shift-date").value;
+  const hours = parseFloat(document.getElementById("shift-hours").value);
+
+  if (!date || !hours || hours <= 0) {
+    alert("Enter a date and hours worked first.");
+    return;
+  }
+
+  if (getWage() === 0) {
+    alert("Set your hourly wage in Settings first so earnings can be calculated.");
+  }
+
+  addShift(date, hours);
+  document.getElementById("shift-hours").value = "";
+  renderWorkPage();
+});
+
+document.getElementById("work-period").addEventListener("change", renderWorkStats);
+
+document.getElementById("wage-input").addEventListener("input", (e) => {
+  setWage(e.target.value || 0);
+  renderWorkPage();
+});
+
+// ---------- Page switching (Dashboard / Gym / Work) ----------
 
 function switchPage(page) {
   document.querySelectorAll(".page").forEach((el) => el.classList.add("hidden"));
@@ -165,6 +289,10 @@ function switchPage(page) {
 
   if (page === "gym") {
     renderAll();
+  }
+
+  if (page === "work") {
+    renderWorkPage();
   }
 }
 
@@ -214,6 +342,12 @@ document.addEventListener("keydown", (e) => {
 initTheme();
 
 document.getElementById("session-date").value = new Date().toISOString().split("T")[0];
+document.getElementById("shift-date").value = new Date().toISOString().split("T")[0];
+
+const savedWage = getWage();
+if (savedWage > 0) {
+  document.getElementById("wage-input").value = savedWage;
+}
 
 const savedPage = localStorage.getItem(PAGE_KEY) || "dashboard";
 switchPage(savedPage);
