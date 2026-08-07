@@ -1,8 +1,12 @@
 // Bulk Tracker - app.js
-// Step 2: Gym session log (dropdown + date) with list/calendar history.
-// Work log and dashboard come in later steps. Data is localStorage only for now.
+// Dashboard + Gym pages, gym session log with list/calendar history,
+// settings popup with theme switching. Data is localStorage only for now.
 
 const STORAGE_KEY = "bulk-tracker-sessions";
+const THEME_KEY = "bulk-tracker-theme";
+const PAGE_KEY = "bulk-tracker-page";
+
+// ---------- Sessions data ----------
 
 function getSessions() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -16,7 +20,6 @@ function saveSessions(sessions) {
 function addSession(type, date) {
   const sessions = getSessions();
   sessions.push({ id: Date.now().toString(), type, date });
-  // newest first
   sessions.sort((a, b) => new Date(b.date) - new Date(a.date));
   saveSessions(sessions);
 }
@@ -66,7 +69,7 @@ function renderList() {
 
 // ---------- Calendar view ----------
 
-let calViewDate = new Date(); // tracks which month is shown
+let calViewDate = new Date();
 
 function renderCalendar() {
   const grid = document.getElementById("cal-grid");
@@ -103,12 +106,12 @@ function renderCalendar() {
   grid.innerHTML = html;
 }
 
-// ---------- Wiring ----------
-
 function renderAll() {
   renderList();
   renderCalendar();
 }
+
+// ---------- Gym page wiring ----------
 
 document.getElementById("log-session-btn").addEventListener("click", () => {
   const type = document.getElementById("session-type").value;
@@ -148,9 +151,28 @@ document.getElementById("cal-next").addEventListener("click", () => {
   renderCalendar();
 });
 
-// ---------- Settings / theme ----------
+// ---------- Page switching (Dashboard / Gym) ----------
 
-const THEME_KEY = "bulk-tracker-theme";
+function switchPage(page) {
+  document.querySelectorAll(".page").forEach((el) => el.classList.add("hidden"));
+  document.getElementById(`page-${page}`).classList.remove("hidden");
+
+  document.querySelectorAll(".nav-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.page === page);
+  });
+
+  localStorage.setItem(PAGE_KEY, page);
+
+  if (page === "gym") {
+    renderAll();
+  }
+}
+
+document.querySelectorAll(".nav-btn").forEach((btn) => {
+  btn.addEventListener("click", () => switchPage(btn.dataset.page));
+});
+
+// ---------- Settings popup / theme ----------
 
 function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
@@ -171,22 +193,29 @@ document.querySelectorAll(".theme-swatch").forEach((btn) => {
 });
 
 function openSettings() {
-  document.getElementById("settings-panel").classList.add("open");
+  document.getElementById("settings-modal").classList.remove("hidden");
   document.getElementById("settings-overlay").classList.remove("hidden");
 }
 
 function closeSettings() {
-  document.getElementById("settings-panel").classList.remove("open");
+  document.getElementById("settings-modal").classList.add("hidden");
   document.getElementById("settings-overlay").classList.add("hidden");
 }
 
 document.getElementById("settings-btn").addEventListener("click", openSettings);
 document.getElementById("settings-close").addEventListener("click", closeSettings);
 document.getElementById("settings-overlay").addEventListener("click", closeSettings);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeSettings();
+});
+
+// ---------- Init ----------
 
 initTheme();
 
-// default date input to today
 document.getElementById("session-date").value = new Date().toISOString().split("T")[0];
+
+const savedPage = localStorage.getItem(PAGE_KEY) || "dashboard";
+switchPage(savedPage);
 
 renderAll();
