@@ -148,6 +148,44 @@ document.getElementById("cal-next").addEventListener("click", () => {
   renderCalendar();
 });
 
+// ---------- Settings / theme ----------
+
+const THEME_KEY = "bulk-tracker-theme";
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem(THEME_KEY, theme);
+
+  document.querySelectorAll(".theme-swatch").forEach((btn) => {
+    btn.classList.toggle("selected", btn.dataset.theme === theme);
+  });
+}
+
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY) || "midnight";
+  applyTheme(saved);
+}
+
+document.querySelectorAll(".theme-swatch").forEach((btn) => {
+  btn.addEventListener("click", () => applyTheme(btn.dataset.theme));
+});
+
+function openSettings() {
+  document.getElementById("settings-panel").classList.add("open");
+  document.getElementById("settings-overlay").classList.remove("hidden");
+}
+
+function closeSettings() {
+  document.getElementById("settings-panel").classList.remove("open");
+  document.getElementById("settings-overlay").classList.add("hidden");
+}
+
+document.getElementById("settings-btn").addEventListener("click", openSettings);
+document.getElementById("settings-close").addEventListener("click", closeSettings);
+document.getElementById("settings-overlay").addEventListener("click", closeSettings);
+
+initTheme();
+
 // default date input to today
 document.getElementById("session-date").value = new Date().toISOString().split("T")[0];
 
