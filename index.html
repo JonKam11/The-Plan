@@ -14,6 +14,7 @@
     <nav class="page-nav">
       <button class="nav-btn active" data-page="dashboard">Dashboard</button>
       <button class="nav-btn" data-page="gym">Gym</button>
+      <button class="nav-btn" data-page="work">Work</button>
     </nav>
 
     <button id="settings-btn" class="settings-btn" aria-label="Open settings">
@@ -53,6 +54,14 @@
           <span class="swatch-preview swatch-graphite"></span>
           Graphite
         </button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Work</h3>
+      <div class="field">
+        <label for="wage-input">Hourly wage (kr)</label>
+        <input type="number" id="wage-input" min="0" step="0.5" placeholder="e.g. 180" />
       </div>
     </div>
   </div>
@@ -111,6 +120,54 @@
           <div id="cal-grid" class="cal-grid"></div>
         </div>
       </div>
+    </section>
+
+    <!-- Work page -->
+    <section id="page-work" class="page hidden">
+
+      <div class="card total-card">
+        <div class="total-header">
+          <h2>Total earned</h2>
+          <select id="work-period">
+            <option value="month">This month</option>
+            <option value="total">Total</option>
+          </select>
+        </div>
+        <div id="total-earned" class="total-amount">0 kr</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="card stat-card">
+          <h3>Hours worked</h3>
+          <div id="stat-hours" class="stat-value">0</div>
+        </div>
+        <div class="card stat-card">
+          <h3>Earned</h3>
+          <div id="stat-earned" class="stat-value">0 kr</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Log a shift</h2>
+
+        <div class="field">
+          <label for="shift-date">Date</label>
+          <input type="date" id="shift-date" />
+        </div>
+
+        <div class="field">
+          <label for="shift-hours">Hours worked</label>
+          <input type="number" id="shift-hours" min="0" step="0.25" placeholder="e.g. 6.5" />
+        </div>
+
+        <button id="log-shift-btn">Log shift</button>
+      </div>
+
+      <div class="card">
+        <h2>Shift history</h2>
+        <div id="shift-list" class="history-list"></div>
+      </div>
+
     </section>
 
   </main>
