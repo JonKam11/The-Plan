@@ -1,3 +1,50 @@
+/* ===== Design tokens ===== */
+:root,
+[data-theme="midnight"] {
+  --bg: #0a0d14;
+  --bg-elevated: #10141d;
+  --card: #141924;
+  --card-hover: #18202e;
+  --border: #232b3a;
+  --text: #eef0f4;
+  --text-dim: #8890a0;
+  --accent: #4f7fff;
+  --accent-hover: #3d6bea;
+  --accent-soft: #1a2b52;
+  --danger: #ff6b6b;
+  --danger-soft: #2a1616;
+}
+
+[data-theme="charcoal"] {
+  --bg: #101112;
+  --bg-elevated: #17181a;
+  --card: #1c1d20;
+  --card-hover: #232427;
+  --border: #2c2d31;
+  --text: #f0f0f0;
+  --text-dim: #8f9096;
+  --accent: #6c8cff;
+  --accent-hover: #5a79ea;
+  --accent-soft: #23283f;
+  --danger: #ff6b6b;
+  --danger-soft: #2a1a1a;
+}
+
+[data-theme="graphite"] {
+  --bg: #131316;
+  --bg-elevated: #1a1a1e;
+  --card: #1f1f24;
+  --card-hover: #26262c;
+  --border: #303038;
+  --text: #ededef;
+  --text-dim: #93939c;
+  --accent: #7c93ff;
+  --accent-hover: #6a7fea;
+  --accent-soft: #262b47;
+  --danger: #ff7070;
+  --danger-soft: #2b1c1c;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,42 +53,98 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #0f1115;
-  color: #f2f2f2;
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
+/* ===== Topbar ===== */
+
 .topbar {
-  padding: 20px;
-  border-bottom: 1px solid #22252c;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .topbar h1 {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+}
+
+.icon-btn:hover {
+  background: var(--card-hover);
+  color: var(--text);
+  border-color: var(--accent);
+  transform: rotate(20deg);
+}
+
+#settings-close.icon-btn:hover {
+  transform: rotate(90deg);
+}
+
+/* ===== Main layout ===== */
 
 main {
   padding: 20px;
-}
-
-.placeholder {
-  color: #9a9fab;
-  font-size: 0.95rem;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 .card {
-  background: #171a21;
-  border: 1px solid #22252c;
-  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
   padding: 18px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
+  animation: fadeSlideIn 0.4s ease both;
+  transition: border-color 0.2s ease;
+}
+
+.card:nth-of-type(2) {
+  animation-delay: 0.06s;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .card h2 {
-  font-size: 1.05rem;
+  font-size: 1rem;
+  font-weight: 700;
   margin-bottom: 14px;
+  letter-spacing: -0.01em;
 }
+
+/* ===== Form fields ===== */
 
 .field {
   margin-bottom: 14px;
@@ -49,36 +152,51 @@ main {
 
 .field label {
   display: block;
-  font-size: 0.85rem;
-  color: #9a9fab;
+  font-size: 0.82rem;
+  color: var(--text-dim);
   margin-bottom: 6px;
 }
 
 .field select,
 .field input {
   width: 100%;
-  padding: 10px;
-  background: #0f1115;
-  border: 1px solid #2a2e37;
-  border-radius: 8px;
-  color: #f2f2f2;
+  padding: 11px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
   font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field select:focus,
+.field input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 button {
-  background: #4f8cff;
+  background: var(--accent);
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
+  border-radius: 9px;
+  padding: 11px 18px;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s ease, transform 0.12s ease;
 }
 
 button:hover {
-  background: #3d78e8;
+  background: var(--accent-hover);
 }
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* ===== History ===== */
 
 .history-header {
   display: flex;
@@ -94,22 +212,30 @@ button:hover {
 .view-toggle {
   display: flex;
   gap: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 3px;
 }
 
 .toggle-btn {
-  background: #0f1115;
-  border: 1px solid #2a2e37;
-  color: #9a9fab;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
   padding: 6px 12px;
   font-size: 0.8rem;
   font-weight: 500;
-  border-radius: 6px;
+  border-radius: 7px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.toggle-btn:hover {
+  background: var(--card-hover);
 }
 
 .toggle-btn.active {
-  background: #4f8cff;
+  background: var(--accent);
   color: #fff;
-  border-color: #4f8cff;
 }
 
 .hidden {
@@ -126,11 +252,18 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #0f1115;
-  border: 1px solid #22252c;
-  border-radius: 8px;
-  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
   font-size: 0.9rem;
+  animation: fadeSlideIn 0.3s ease both;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.history-item:hover {
+  border-color: var(--accent);
+  transform: translateX(2px);
 }
 
 .history-item .session-name {
@@ -138,27 +271,31 @@ button:hover {
 }
 
 .history-item .session-date {
-  color: #9a9fab;
-  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  margin-top: 2px;
 }
 
 .history-item .delete-btn {
   background: transparent;
-  color: #ff6b6b;
-  padding: 4px 8px;
-  font-size: 0.8rem;
+  color: var(--danger);
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-weight: 500;
 }
 
 .history-item .delete-btn:hover {
-  background: #2a1616;
+  background: var(--danger-soft);
 }
 
 .empty-state {
-  color: #9a9fab;
+  color: var(--text-dim);
   font-size: 0.85rem;
   text-align: center;
-  padding: 20px 0;
+  padding: 24px 0;
 }
+
+/* ===== Calendar ===== */
 
 .cal-nav {
   display: flex;
@@ -168,10 +305,14 @@ button:hover {
 }
 
 .cal-nav button {
-  background: #0f1115;
-  border: 1px solid #2a2e37;
-  color: #f2f2f2;
-  padding: 6px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 14px;
+}
+
+.cal-nav button:hover {
+  background: var(--card-hover);
 }
 
 #cal-month-label {
@@ -182,13 +323,13 @@ button:hover {
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 5px;
 }
 
 .cal-day-label {
   text-align: center;
-  font-size: 0.7rem;
-  color: #9a9fab;
+  font-size: 0.68rem;
+  color: var(--text-dim);
   padding: 4px 0;
 }
 
@@ -197,11 +338,12 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.8rem;
-  background: #0f1115;
-  border: 1px solid #22252c;
-  color: #6a6f7b;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  transition: background 0.2s ease, transform 0.15s ease;
 }
 
 .cal-day.empty {
@@ -210,8 +352,131 @@ button:hover {
 }
 
 .cal-day.has-session {
-  background: #1c3a6e;
-  border-color: #4f8cff;
-  color: #f2f2f2;
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.cal-day:not(.empty):hover {
+  transform: scale(1.08);
+}
+
+/* ===== Settings panel ===== */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.overlay:not(.hidden) {
+  opacity: 1;
+}
+
+.settings-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(320px, 85vw);
+  background: var(--bg-elevated);
+  border-left: 1px solid var(--border);
+  z-index: 30;
+  padding: 20px;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.settings-panel.open {
+  transform: translateX(0);
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.settings-header h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.settings-section h3 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  margin-bottom: 12px;
   font-weight: 600;
+}
+
+.theme-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.theme-swatch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-align: left;
+  justify-content: flex-start;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.theme-swatch:hover {
+  background: var(--card-hover);
+}
+
+.theme-swatch.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.swatch-preview {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+}
+
+.swatch-midnight {
+  background: linear-gradient(135deg, #0a0d14, #4f7fff);
+}
+
+.swatch-charcoal {
+  background: linear-gradient(135deg, #101112, #6c8cff);
+}
+
+.swatch-graphite {
+  background: linear-gradient(135deg, #1f1f24, #7c93ff);
+}
+
+/* ===== Reduced motion ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }
