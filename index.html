@@ -48,24 +48,27 @@
       <div class="theme-options">
         <button class="theme-swatch" data-theme="midnight">
           <span class="swatch-preview swatch-midnight"></span>
-          Deep Navy
+          Navy
         </button>
-        <button class="theme-swatch" data-theme="charcoal">
-          <span class="swatch-preview swatch-charcoal"></span>
-          Charcoal
+        <button class="theme-swatch" data-theme="violet">
+          <span class="swatch-preview swatch-violet"></span>
+          Violet
         </button>
-        <button class="theme-swatch" data-theme="graphite">
-          <span class="swatch-preview swatch-graphite"></span>
-          Graphite
+        <button class="theme-swatch" data-theme="sage">
+          <span class="swatch-preview swatch-sage"></span>
+          Sage
         </button>
       </div>
     </div>
 
     <div class="settings-section">
       <h3>Work</h3>
-      <div class="field">
-        <label for="wage-input">Hourly wage (kr)</label>
-        <input type="number" id="wage-input" min="0" step="0.5" placeholder="e.g. 180" />
+      <div class="settings-field-card">
+        <label for="wage-input">Hourly wage</label>
+        <div class="wage-input-row">
+          <input type="number" id="wage-input" min="0" step="0.5" placeholder="e.g. 180" />
+          <span class="wage-unit">kr/h</span>
+        </div>
       </div>
     </div>
   </div>
