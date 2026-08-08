@@ -4,25 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bulk Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <header class="topbar">
-    <h1>Bulk Tracker</h1>
+    <button class="brand" id="home-btn">
+      <span class="brand-mark"></span>
+      <span class="brand-name">Bulk Tracker</span>
+    </button>
 
     <nav class="page-nav">
-      <button class="nav-btn active" data-page="dashboard">Dashboard</button>
       <button class="nav-btn" data-page="gym">Gym</button>
       <button class="nav-btn" data-page="work">Work</button>
     </nav>
 
-    <button id="settings-btn" class="settings-btn" aria-label="Open settings">
+    <button id="settings-btn" class="icon-btn" aria-label="Open settings">
       <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="3"></circle>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
       </svg>
-      <span>Settings</span>
     </button>
   </header>
 
@@ -44,7 +48,7 @@
       <div class="theme-options">
         <button class="theme-swatch" data-theme="midnight">
           <span class="swatch-preview swatch-midnight"></span>
-          Midnight Navy
+          Deep Navy
         </button>
         <button class="theme-swatch" data-theme="charcoal">
           <span class="swatch-preview swatch-charcoal"></span>
@@ -68,12 +72,45 @@
 
   <main>
 
-    <!-- Dashboard page -->
+    <!-- Dashboard page (home) -->
     <section id="page-dashboard" class="page">
-      <div class="card">
-        <h2>Dashboard</h2>
-        <p class="placeholder">Your weekly overview will live here — gym sessions, work hours, and earnings at a glance.</p>
+
+      <div class="readout-strip">
+        <div class="readout">
+          <div class="readout-label">Sessions / wk</div>
+          <div class="readout-value" id="ro-sessions">0<span class="readout-unit">/4</span></div>
+        </div>
+        <div class="readout-divider"></div>
+        <div class="readout">
+          <div class="readout-label">Hours / wk</div>
+          <div class="readout-value" id="ro-hours">0.0<span class="readout-unit">h</span></div>
+        </div>
+        <div class="readout-divider"></div>
+        <div class="readout">
+          <div class="readout-label">Earned / mo</div>
+          <div class="readout-value" id="ro-earned">0<span class="readout-unit">kr</span></div>
+        </div>
       </div>
+
+      <button class="summary-card" id="go-gym">
+        <div class="summary-top">
+          <span class="summary-label">This week</span>
+          <span class="summary-arrow">Gym →</span>
+        </div>
+        <div class="summary-bar-track">
+          <div class="summary-bar-fill" id="gym-progress-fill"></div>
+        </div>
+        <div class="summary-detail" id="gym-progress-text">0 of 4 sessions logged</div>
+      </button>
+
+      <button class="summary-card" id="go-work">
+        <div class="summary-top">
+          <span class="summary-label">This month</span>
+          <span class="summary-arrow">Work →</span>
+        </div>
+        <div class="summary-detail-large" id="work-summary-text">0.0h logged · 0 kr</div>
+      </button>
+
     </section>
 
     <!-- Gym page -->
@@ -97,7 +134,7 @@
           <input type="date" id="session-date" />
         </div>
 
-        <button id="log-session-btn">Log session</button>
+        <button class="btn-primary" id="log-session-btn">Log session</button>
       </div>
 
       <div class="card">
@@ -133,7 +170,7 @@
             <option value="total">Total</option>
           </select>
         </div>
-        <div id="total-earned" class="total-amount">0 kr</div>
+        <div id="total-earned" class="total-amount">0<span class="total-unit">kr</span></div>
       </div>
 
       <div class="stat-row">
@@ -143,7 +180,7 @@
         </div>
         <div class="card stat-card">
           <h3>Earned</h3>
-          <div id="stat-earned" class="stat-value">0 kr</div>
+          <div id="stat-earned" class="stat-value">0<span class="stat-unit">kr</span></div>
         </div>
       </div>
 
@@ -160,7 +197,7 @@
           <input type="number" id="shift-hours" min="0" step="0.25" placeholder="e.g. 6.5" />
         </div>
 
-        <button id="log-shift-btn">Log shift</button>
+        <button class="btn-primary" id="log-shift-btn">Log shift</button>
       </div>
 
       <div class="card">
