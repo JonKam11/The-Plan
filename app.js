@@ -1,12 +1,51 @@
 // Bulk Tracker - app.js
-// Dashboard + Gym pages, gym session log with list/calendar history,
-// settings popup with theme switching. Data is localStorage only for now.
+// Dashboard (home) + Gym + Work pages, settings popup with theme switching.
+// Data is localStorage only for now.
 
 const STORAGE_KEY = "bulk-tracker-sessions";
+const SHIFTS_KEY = "bulk-tracker-shifts";
+const WAGE_KEY = "bulk-tracker-wage";
 const THEME_KEY = "bulk-tracker-theme";
 const PAGE_KEY = "bulk-tracker-page";
 
-// ---------- Sessions data ----------
+const WEEKLY_SESSION_TARGET = 4;
+
+// ---------- Shared helpers ----------
+
+function formatDateLabel(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+}
+
+function formatKr(amount) {
+  return Math.round(amount).toLocaleString("nb-NO");
+}
+
+function getMondayOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0 = Sunday
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function isInCurrentWeek(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  const monday = getMondayOfWeek(new Date());
+  const sunday = new Date(monday);
+  sunday.setDate(sunday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+  return d >= monday && d <= sunday;
+}
+
+function isThisMonth(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+}
+
+// ---------- Sessions (Gym) data ----------
 
 function getSessions() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -25,16 +64,10 @@ function addSession(type, date) {
 }
 
 function deleteSession(id) {
-  const sessions = getSessions().filter((s) => s.id !== id);
-  saveSessions(sessions);
+  saveSessions(getSessions().filter((s) => s.id !== id));
 }
 
-function formatDateLabel(dateStr) {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
-}
-
-// ---------- List view ----------
+// ---------- Gym: list view ----------
 
 function renderList() {
   const listEl = document.getElementById("history-list");
@@ -62,12 +95,12 @@ function renderList() {
   listEl.querySelectorAll(".delete-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       deleteSession(btn.dataset.id);
-      renderAll();
+      renderGymPage();
     });
   });
 }
 
-// ---------- Calendar view ----------
+// ---------- Gym: calendar view ----------
 
 let calViewDate = new Date();
 
@@ -79,23 +112,17 @@ function renderCalendar() {
   const year = calViewDate.getFullYear();
   const month = calViewDate.getMonth();
 
-  label.textContent = calViewDate.toLocaleDateString("en-GB", {
-    month: "long",
-    year: "numeric",
-  });
+  label.textContent = calViewDate.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
 
   const sessionDates = new Set(sessions.map((s) => s.date));
-
   const firstOfMonth = new Date(year, month, 1);
-  const startWeekday = (firstOfMonth.getDay() + 6) % 7; // Monday = 0
+  const startWeekday = (firstOfMonth.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const dayLabels = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
   let html = dayLabels.map((d) => `<div class="cal-day-label">${d}</div>`).join("");
 
-  for (let i = 0; i < startWeekday; i++) {
-    html += `<div class="cal-day empty"></div>`;
-  }
+  for (let i = 0; i < startWeekday; i++) html += `<div class="cal-day empty"></div>`;
 
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -106,7 +133,7 @@ function renderCalendar() {
   grid.innerHTML = html;
 }
 
-function renderAll() {
+function renderGymPage() {
   renderList();
   renderCalendar();
 }
@@ -124,7 +151,7 @@ document.getElementById("log-session-btn").addEventListener("click", () => {
 
   addSession(type, date);
   document.getElementById("session-type").value = "";
-  renderAll();
+  renderGymPage();
 });
 
 document.getElementById("view-list-btn").addEventListener("click", () => {
@@ -153,9 +180,6 @@ document.getElementById("cal-next").addEventListener("click", () => {
 
 // ---------- Work / shifts data ----------
 
-const SHIFTS_KEY = "bulk-tracker-shifts";
-const WAGE_KEY = "bulk-tracker-wage";
-
 function getShifts() {
   const raw = localStorage.getItem(SHIFTS_KEY);
   return raw ? JSON.parse(raw) : [];
@@ -173,8 +197,7 @@ function addShift(date, hours) {
 }
 
 function deleteShift(id) {
-  const shifts = getShifts().filter((s) => s.id !== id);
-  saveShifts(shifts);
+  saveShifts(getShifts().filter((s) => s.id !== id));
 }
 
 function getWage() {
@@ -184,16 +207,6 @@ function getWage() {
 
 function setWage(value) {
   localStorage.setItem(WAGE_KEY, value);
-}
-
-function formatKr(amount) {
-  return `${Math.round(amount).toLocaleString("nb-NO")} kr`;
-}
-
-function isThisMonth(dateStr) {
-  const d = new Date(dateStr + "T00:00:00");
-  const now = new Date();
-  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
 }
 
 function renderShiftList() {
@@ -213,7 +226,7 @@ function renderShiftList() {
       return `
       <div class="history-item">
         <div>
-          <div class="session-name">${s.hours}h — ${formatKr(earned)}</div>
+          <div class="session-name">${s.hours}h — ${formatKr(earned)} kr</div>
           <div class="session-date">${formatDateLabel(s.date)}</div>
         </div>
         <button class="delete-btn" data-id="${s.id}">Delete</button>
@@ -240,9 +253,9 @@ function renderWorkStats() {
   const totalHours = relevant.reduce((sum, s) => sum + s.hours, 0);
   const totalEarned = totalHours * wage;
 
-  document.getElementById("total-earned").textContent = formatKr(totalEarned);
+  document.getElementById("total-earned").innerHTML = `${formatKr(totalEarned)}<span class="total-unit">kr</span>`;
   document.getElementById("stat-hours").textContent = totalHours.toLocaleString("nb-NO");
-  document.getElementById("stat-earned").textContent = formatKr(totalEarned);
+  document.getElementById("stat-earned").innerHTML = `${formatKr(totalEarned)}<span class="stat-unit">kr</span>`;
 }
 
 function renderWorkPage() {
@@ -273,9 +286,46 @@ document.getElementById("work-period").addEventListener("change", renderWorkStat
 document.getElementById("wage-input").addEventListener("input", (e) => {
   setWage(e.target.value || 0);
   renderWorkPage();
+  renderDashboard();
 });
 
-// ---------- Page switching (Dashboard / Gym / Work) ----------
+// ---------- Dashboard (home) ----------
+
+function renderDashboard() {
+  const sessions = getSessions();
+  const shifts = getShifts();
+  const wage = getWage();
+
+  // Sessions this week
+  const sessionsThisWeek = sessions.filter((s) => isInCurrentWeek(s.date)).length;
+  document.getElementById("ro-sessions").innerHTML = `${sessionsThisWeek}<span class="readout-unit">/${WEEKLY_SESSION_TARGET}</span>`;
+
+  const gymPct = Math.min(100, Math.round((sessionsThisWeek / WEEKLY_SESSION_TARGET) * 100));
+  document.getElementById("gym-progress-fill").style.width = `${gymPct}%`;
+  document.getElementById("gym-progress-text").textContent =
+    `${sessionsThisWeek} of ${WEEKLY_SESSION_TARGET} sessions logged`;
+
+  // Hours this week
+  const hoursThisWeek = shifts
+    .filter((s) => isInCurrentWeek(s.date))
+    .reduce((sum, s) => sum + s.hours, 0);
+  document.getElementById("ro-hours").innerHTML = `${hoursThisWeek.toFixed(1)}<span class="readout-unit">h</span>`;
+
+  // Earned this month
+  const shiftsThisMonth = shifts.filter((s) => isThisMonth(s.date));
+  const hoursThisMonth = shiftsThisMonth.reduce((sum, s) => sum + s.hours, 0);
+  const earnedThisMonth = hoursThisMonth * wage;
+  document.getElementById("ro-earned").innerHTML = `${formatKr(earnedThisMonth)}<span class="readout-unit">kr</span>`;
+
+  document.getElementById("work-summary-text").textContent =
+    `${hoursThisMonth.toFixed(1)}h logged · ${formatKr(earnedThisMonth)} kr`;
+}
+
+document.getElementById("go-gym").addEventListener("click", () => switchPage("gym"));
+document.getElementById("go-work").addEventListener("click", () => switchPage("work"));
+document.getElementById("home-btn").addEventListener("click", () => switchPage("dashboard"));
+
+// ---------- Page switching ----------
 
 function switchPage(page) {
   document.querySelectorAll(".page").forEach((el) => el.classList.add("hidden"));
@@ -287,13 +337,9 @@ function switchPage(page) {
 
   localStorage.setItem(PAGE_KEY, page);
 
-  if (page === "gym") {
-    renderAll();
-  }
-
-  if (page === "work") {
-    renderWorkPage();
-  }
+  if (page === "dashboard") renderDashboard();
+  if (page === "gym") renderGymPage();
+  if (page === "work") renderWorkPage();
 }
 
 document.querySelectorAll(".nav-btn").forEach((btn) => {
@@ -305,15 +351,13 @@ document.querySelectorAll(".nav-btn").forEach((btn) => {
 function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
   localStorage.setItem(THEME_KEY, theme);
-
   document.querySelectorAll(".theme-swatch").forEach((btn) => {
     btn.classList.toggle("selected", btn.dataset.theme === theme);
   });
 }
 
 function initTheme() {
-  const saved = localStorage.getItem(THEME_KEY) || "midnight";
-  applyTheme(saved);
+  applyTheme(localStorage.getItem(THEME_KEY) || "midnight");
 }
 
 document.querySelectorAll(".theme-swatch").forEach((btn) => {
@@ -345,11 +389,7 @@ document.getElementById("session-date").value = new Date().toISOString().split("
 document.getElementById("shift-date").value = new Date().toISOString().split("T")[0];
 
 const savedWage = getWage();
-if (savedWage > 0) {
-  document.getElementById("wage-input").value = savedWage;
-}
+if (savedWage > 0) document.getElementById("wage-input").value = savedWage;
 
 const savedPage = localStorage.getItem(PAGE_KEY) || "dashboard";
 switchPage(savedPage);
-
-renderAll();
