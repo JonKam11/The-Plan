@@ -95,24 +95,10 @@
         </div>
       </div>
 
-      <button class="summary-card" id="go-gym">
-        <div class="summary-top">
-          <span class="summary-label">This week</span>
-          <span class="summary-arrow">Gym →</span>
-        </div>
-        <div class="summary-bar-track">
-          <div class="summary-bar-fill" id="gym-progress-fill"></div>
-        </div>
-        <div class="summary-detail" id="gym-progress-text">0 of 4 sessions logged</div>
-      </button>
-
-      <button class="summary-card" id="go-work">
-        <div class="summary-top">
-          <span class="summary-label">This month</span>
-          <span class="summary-arrow">Work →</span>
-        </div>
-        <div class="summary-detail-large" id="work-summary-text">0.0h logged · 0 kr</div>
-      </button>
+      <div class="card" id="recent-activity-card">
+        <h2>Recent activity</h2>
+        <div id="recent-activity-list" class="history-list"></div>
+      </div>
 
     </section>
 
@@ -124,11 +110,9 @@
         <div class="field">
           <label for="session-type">Which session did you do?</label>
           <select id="session-type">
-            <option value="">Select session...</option>
-            <option value="Upper A">Upper A</option>
-            <option value="Lower A">Lower A</option>
-            <option value="Upper B">Upper B</option>
-            <option value="Lower B">Lower B</option>
+            <option value="Upper">Upper</option>
+            <option value="Lower">Lower</option>
+            <option value="Rest">Rest</option>
           </select>
         </div>
 
