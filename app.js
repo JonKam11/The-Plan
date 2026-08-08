@@ -144,13 +144,13 @@ document.getElementById("log-session-btn").addEventListener("click", () => {
   const type = document.getElementById("session-type").value;
   const date = document.getElementById("session-date").value;
 
-  if (!type || !date) {
-    alert("Pick a session type and a date first.");
+  if (!date) {
+    alert("Pick a date first.");
     return;
   }
 
   addSession(type, date);
-  document.getElementById("session-type").value = "";
+  document.getElementById("session-type").value = "Upper";
   renderGymPage();
 });
 
@@ -300,11 +300,6 @@ function renderDashboard() {
   const sessionsThisWeek = sessions.filter((s) => isInCurrentWeek(s.date)).length;
   document.getElementById("ro-sessions").innerHTML = `${sessionsThisWeek}<span class="readout-unit">/${WEEKLY_SESSION_TARGET}</span>`;
 
-  const gymPct = Math.min(100, Math.round((sessionsThisWeek / WEEKLY_SESSION_TARGET) * 100));
-  document.getElementById("gym-progress-fill").style.width = `${gymPct}%`;
-  document.getElementById("gym-progress-text").textContent =
-    `${sessionsThisWeek} of ${WEEKLY_SESSION_TARGET} sessions logged`;
-
   // Hours this week
   const hoursThisWeek = shifts
     .filter((s) => isInCurrentWeek(s.date))
@@ -317,12 +312,35 @@ function renderDashboard() {
   const earnedThisMonth = hoursThisMonth * wage;
   document.getElementById("ro-earned").innerHTML = `${formatKr(earnedThisMonth)}<span class="readout-unit">kr</span>`;
 
-  document.getElementById("work-summary-text").textContent =
-    `${hoursThisMonth.toFixed(1)}h logged · ${formatKr(earnedThisMonth)} kr`;
+  // Recent activity feed — merge sessions + shifts, newest first
+  const feedItems = [
+    ...sessions.map((s) => ({ kind: "gym", date: s.date, label: s.type })),
+    ...shifts.map((s) => ({ kind: "work", date: s.date, label: `${s.hours}h shift — ${formatKr(s.hours * wage)} kr` })),
+  ]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 6);
+
+  const listEl = document.getElementById("recent-activity-list");
+
+  if (feedItems.length === 0) {
+    listEl.innerHTML = `<div class="empty-state">Nothing logged yet — head to Gym or Work to add your first entry.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = feedItems
+    .map(
+      (item) => `
+      <div class="history-item">
+        <div>
+          <div class="session-name">${item.kind === "gym" ? "🏋 " : "💼 "}${item.label}</div>
+          <div class="session-date">${formatDateLabel(item.date)}</div>
+        </div>
+      </div>
+    `
+    )
+    .join("");
 }
 
-document.getElementById("go-gym").addEventListener("click", () => switchPage("gym"));
-document.getElementById("go-work").addEventListener("click", () => switchPage("work"));
 document.getElementById("home-btn").addEventListener("click", () => switchPage("dashboard"));
 
 // ---------- Page switching ----------
